@@ -133,9 +133,11 @@ auto_poetry() {
     
     # Use Poetry env info
     [[ "$POETRY_AUTO_VERBOSE" = "1" ]] && echo "poetry-auto: Looking up Poetry environment"
-    local poetry_env_path="/tmp/mock_poetry_venv"
-    if [[ -f "$poetry_env_path/bin/activate" ]]; then
-        [[ "$POETRY_AUTO_VERBOSE" = "1" ]] && echo "poetry-auto: Activating Poetry environment"
+    # Get the actual env path from Poetry
+    local poetry_env_path=$(poetry env info -p 2>/dev/null)
+    
+    if [[ -n "$poetry_env_path" && -f "$poetry_env_path/bin/activate" ]]; then
+        [[ "$POETRY_AUTO_VERBOSE" = "1" ]] && echo "poetry-auto: Activating Poetry environment at $poetry_env_path"
         source "$poetry_env_path/bin/activate"
         export POETRY_PROJECT="test-project"
         return
