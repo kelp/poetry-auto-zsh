@@ -9,6 +9,11 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        poetry-version: ["1.8.5", "2.0.0", "latest"]
+    
+    name: Poetry ${{ matrix.poetry-version }}
     
     steps:
     - uses: actions/checkout@v3
@@ -17,7 +22,13 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y zsh python3-pip
-        pip install "poetry==2.1.1"
+        if [ "${{ matrix.poetry-version }}" == "latest" ]; then
+          pip install poetry
+        else
+          pip install "poetry==${{ matrix.poetry-version }}"
+        fi
+        # Print poetry version for debugging
+        poetry --version
         
     - name: Run tests
       run: make test-verbose
