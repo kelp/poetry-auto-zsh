@@ -125,6 +125,6 @@ _poetry_auto_hook() {
     auto_poetry > /dev/null 2>&1
 }
 
-# Export the functions
-export -f auto_poetry
-export -f _poetry_auto_hook
+# ZSH doesn't need export -f, functions are automatically available
+# Just ensure they're marked for autoload if needed
+autoload -Uz auto_poetry _poetry_auto_hook 2>/dev/null || true
