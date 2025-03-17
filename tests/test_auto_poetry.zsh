@@ -50,43 +50,51 @@ deactivate() {
     echo "Mock deactivate called"
 }
 
-# Override the poetry command for testing
-# Save the original poetry command if it exists
-if command -v poetry >/dev/null 2>&1; then
-    real_poetry_cmd=$(which poetry)
-fi
-
-poetry() {
-    if [[ "$1" = "env" && "$2" = "info" && "$3" = "-p" ]]; then
-        # Create a mock virtual env structure for testing
-        mkdir -p /tmp/mock_poetry_venv/bin
-        echo "# Mock activate script" > /tmp/mock_poetry_venv/bin/activate
-        echo "/tmp/mock_poetry_venv"
-        return 0
-    elif [[ "$1" = "--version" && -n "$real_poetry_cmd" ]]; then
-        # Forward the version check to the real poetry command
-        $real_poetry_cmd --version
-        return 0
-    fi
-    return 1
+# Create a temporary poetry project for testing
+setup_test_poetry_project() {
+    echo "Creating test Poetry project..."
+    cd /tmp/test_poetry_project
+    
+    # Initialize a real Poetry project
+    command poetry init --name=test-project --description="Test project" --author="Test <test@example.com>" --no-interaction
+    
+    # Make sure we have a virtual environment
+    command poetry install --no-root --no-ansi
+    
+    echo "Poetry project created and virtual environment initialized"
 }
 
-# Override source for testing
+# Custom wrapper for source to log activations
 real_source="$functions[source]"
 source() {
+    echo "Sourcing: $1"
+    
+    # Track if we're activating a virtualenv
+    if [[ "$1" == *"/activate" ]]; then
+        echo "Activating virtual environment"
+    fi
+    
+    # Use the real source command
     if [[ "$1" == *"/activate" ]]; then
         VIRTUAL_ENV=$(dirname $(dirname $1))
-        echo "Mock source called with $1"
-        echo "VIRTUAL_ENV set to $VIRTUAL_ENV"
+        echo "Setting VIRTUAL_ENV to $VIRTUAL_ENV"
+    fi
+    eval "$real_source \"$1\""
+}
+
+# Function to check if we're in a virtual environment
+is_in_venv() {
+    if [[ -n "$VIRTUAL_ENV" ]]; then
+        echo "In virtual environment: $VIRTUAL_ENV"
         return 0
     else
-        eval "$real_source $@"
+        echo "Not in a virtual environment"
+        return 1
     fi
 }
 
-# Create test .venv for project directory
-mkdir -p /tmp/test_poetry_project/.venv/bin
-echo "# Mock activate script" > /tmp/test_poetry_project/.venv/bin/activate
+# Setup real Poetry project
+setup_test_poetry_project
 
 # Create the test version of auto_poetry
 auto_poetry() {
@@ -164,9 +172,18 @@ fi
 # Test 2: With pyproject.toml (Poetry project)
 echo "Test 2: Poetry project directory"
 cd /tmp/test_poetry_project
-setup_test
-auto_poetry
+
+# Make sure we're not in a virtualenv before starting
 if [[ -n "$VIRTUAL_ENV" ]]; then
+    deactivate
+fi
+
+setup_test
+echo "Running auto_poetry in Poetry project directory"
+auto_poetry
+
+# Check if auto_poetry activated a virtualenv
+if is_in_venv; then
     echo "✅ Test 2 passed: Virtual environment activated"
 else
     echo "❌ Test 2 failed: Virtual environment should be activated"
@@ -175,9 +192,22 @@ fi
 
 # Test 4: Deactivation when leaving project
 echo "Test 4: Deactivation when leaving directory"
+
+# First, make sure we're in the poetry project with an active venv
+cd /tmp/test_poetry_project
+setup_test
+auto_poetry
+
+# Confirm we're in a virtualenv before leaving
+is_in_venv
+
+# Now change to a directory without a poetry project
+echo "Changing to non-poetry directory"
 cd /tmp/test_regular_dir
 setup_test
 auto_poetry
+
+# Check if auto_poetry deactivated the virtualenv
 if [[ -z "$VIRTUAL_ENV" ]]; then
     echo "✅ Test 4 passed: Virtual environment deactivated"
 else
@@ -187,10 +217,20 @@ fi
 
 # Test 5: Disabled functionality
 echo "Test 5: Disabled functionality"
+
+# Make sure we're not in a virtualenv
+if [[ -n "$VIRTUAL_ENV" ]]; then
+    deactivate
+fi
+
+# Disable auto-activation
 POETRY_AUTO_DISABLE=1
 cd /tmp/test_poetry_project
 setup_test
+echo "Running auto_poetry with POETRY_AUTO_DISABLE=1"
 auto_poetry
+
+# Check that auto_poetry didn't activate the virtualenv
 if [[ -z "$VIRTUAL_ENV" ]]; then
     echo "✅ Test 5 passed: Auto-activation disabled correctly"
 else

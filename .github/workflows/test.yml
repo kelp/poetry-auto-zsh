@@ -17,7 +17,7 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y zsh python3-pip
-        pip install poetry
+        pip install "poetry==2.1.1"
         
     - name: Run tests
       run: make test-verbose
