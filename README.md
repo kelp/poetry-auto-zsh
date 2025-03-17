@@ -1,5 +1,10 @@
 # poetry-auto-zsh 🐚+📜
 
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![CI Status](https://github.com/kelp/poetry-auto-zsh/actions/workflows/test.yml/badge.svg)](https://github.com/kelp/poetry-auto-zsh/actions)
+[![Oh My Zsh Plugin](https://img.shields.io/badge/Oh%20My%20Zsh-Plugin-C5D928.svg)](https://ohmyz.sh/)
+[![Zinit Compatible](https://img.shields.io/badge/Zinit-Compatible-blue.svg)](https://github.com/zdharma-continuum/zinit)
+
 > Automatically activate Poetry environments when changing directories in Zsh
 
 This plugin automatically detects and activates Python Poetry virtual environments when you change into a Poetry project directory, and deactivates them when you leave. It's fast, efficient, and highly configurable.
