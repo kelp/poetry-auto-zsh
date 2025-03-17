@@ -9,6 +9,18 @@
 
 This plugin automatically detects and activates Python Poetry virtual environments when you change into a Poetry project directory, and deactivates them when you leave. It's fast, efficient, and highly configurable.
 
+## Why use this instead of poetry-env?
+
+Oh My Zsh includes a built-in [`poetry-env`](https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/poetry-env) plugin that provides similar basic functionality. While both plugins handle automatic Poetry environment activation, poetry-auto-zsh offers several advantages:
+
+- **Performance**: Uses caching to avoid slow `poetry env info` calls on every directory change
+- **Features**: Provides a comprehensive CLI interface for managing auto-activation
+- **Configurability**: Offers environment variables and commands for fine-tuned control
+- **Integration**: Better handles edge cases and interactions with other tools like direnv
+- **User experience**: Adds project name detection for prompt customization
+
+If you just need basic Poetry environment activation, the built-in plugin works fine. Choose poetry-auto-zsh when you need better performance, more features, or finer control.
+
 ## Features
 
 - **Automatic activation/deactivation** of Poetry environments on directory change
