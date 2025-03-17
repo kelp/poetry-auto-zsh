@@ -19,7 +19,7 @@ jobs:
         sudo apt install -y zsh
         
     - name: Run tests
-      run: make test
+      run: make test-verbose
       
     - name: Run lint
       run: make lint
