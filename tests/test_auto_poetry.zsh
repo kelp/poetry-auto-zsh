@@ -7,6 +7,16 @@ POETRY_AUTO_DISABLE=0
 POETRY_AUTO_VERBOSE=1
 POETRY_AUTO_CACHE_DIR="/tmp/poetry_auto_test_cache"
 
+# Check if Poetry is available - this is critical for the tests
+echo "Checking Poetry installation..."
+if command -v poetry >/dev/null 2>&1; then
+    echo "✅ Poetry is installed: $(poetry --version)"
+else
+    echo "❌ ERROR: Poetry is not installed or not in PATH. Tests will fail!"
+    echo "Please install Poetry first: https://python-poetry.org/docs/#installation"
+    # We continue anyway to see the test output
+fi
+
 # Create test directories
 mkdir -p /tmp/test_poetry_project /tmp/test_regular_dir "$POETRY_AUTO_CACHE_DIR"
 
@@ -41,12 +51,21 @@ deactivate() {
 }
 
 # Override the poetry command for testing
+# Save the original poetry command if it exists
+if command -v poetry >/dev/null 2>&1; then
+    real_poetry_cmd=$(which poetry)
+fi
+
 poetry() {
     if [[ "$1" = "env" && "$2" = "info" && "$3" = "-p" ]]; then
         # Create a mock virtual env structure for testing
         mkdir -p /tmp/mock_poetry_venv/bin
         echo "# Mock activate script" > /tmp/mock_poetry_venv/bin/activate
         echo "/tmp/mock_poetry_venv"
+        return 0
+    elif [[ "$1" = "--version" && -n "$real_poetry_cmd" ]]; then
+        # Forward the version check to the real poetry command
+        $real_poetry_cmd --version
         return 0
     fi
     return 1

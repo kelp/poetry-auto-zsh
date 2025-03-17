@@ -13,10 +13,11 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Install Zsh
+    - name: Install Zsh and Poetry
       run: |
         sudo apt update
-        sudo apt install -y zsh
+        sudo apt install -y zsh python3-pip
+        pip install poetry
         
     - name: Run tests
       run: make test-verbose
