@@ -127,3 +127,7 @@ The tests are automatically run on GitHub Actions for all pull requests and push
 ## License
 
 MIT © Travis Cole
+
+---
+
+> **Note:** This plugin was largely developed with assistance from [Claude Code](https://claude.ai/code), Anthropic's AI coding assistant.
