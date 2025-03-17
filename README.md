@@ -109,6 +109,21 @@ PS1+='$(poetry_prompt_info)'
 
 The plugin uses smart caching to avoid repeated slow calls to `poetry env info`. Once a virtual environment is activated, its path is cached using a directory hash, making future activations nearly instantaneous.
 
+## Development
+
+### Running Tests
+
+The plugin includes a test suite that can be run using the Makefile:
+
+```bash
+make test      # Run tests
+make lint      # Check syntax
+make all       # Run both tests and linting
+make clean     # Clean up test artifacts
+```
+
+The tests are automatically run on GitHub Actions for all pull requests and pushes to the main branch.
+
 ## License
 
 MIT © Travis Cole
